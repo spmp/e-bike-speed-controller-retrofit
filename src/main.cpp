@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <EEPROM.h>
 
 /** Pin defines **/
 #define IN_THROTTLE_ADC_PIN     A7
@@ -13,47 +12,48 @@
 // Serial (0) defines
 #define SERIAL0_BAUD            38400
 
-/** EEPROM addresses **/
-#define EEPROM_ADDRESS_ADC_CAL  0
-
-
 /** Throttle calibration constants **/
 #define ADC_MAX                 0x3FF
-#define ADC_CAL_THRESHOLD       800
-#define THROTTLE_LOW_THRESHOLD  100
+#define ADC_THROTTLE_LOW        205
+#define ADC_THROTTLE_HIGH       690
 
 /** Global variables **/
 uint16_t throttle_position_adc  = 0;
-float    throttle_position_cal  = 1.0;
 uint16_t pwm_input_value        = 0;
-
+bool     brake_on               = 1;
 
 /** Functions **/
 
+/** calculate_pwm_input
+ * transform the throttle reading to a value between 0 and PWM_MAX for the
+ * range ADC_THROTTLE_LOW to ADC_THROTTLE_HIGH
+ **/
+uint16_t calculate_pwm_input(uint16_t adc_read){
+  if (adc_read <= ADC_THROTTLE_LOW) {
+    return 0;
+  } else if (adc_read >= ADC_THROTTLE_HIGH){
+    return PWM_MAX;
+  } else {
+    return uint16_t(
+      ((float(adc_read) - ADC_THROTTLE_LOW)/
+        (ADC_THROTTLE_HIGH - ADC_THROTTLE_LOW))*
+        PWM_MAX
+      );
+  }
+}
+
 void setup() {
+  // Set PWM pin output and low at turn on
+  pinMode(OUT_PWM_PIN, OUTPUT);
+  digitalWrite(OUT_PWM_PIN, LOW);
+
   Serial.begin(SERIAL0_BAUD);
 
   /** Set brake input pin as pull up input **/
   pinMode(IN_BRAKE_PIN, INPUT_PULLUP);
 
-  /** Calibrate the throttle **/
-  throttle_position_adc         = analogRead(IN_THROTTLE_ADC_PIN);
-  // Calibrate if ADC measure is above threshold,
-  // i.e throttle is held on when starting
-  if (throttle_position_adc >= ADC_CAL_THRESHOLD) {
-    Serial.println("Calibrating throttle");
-    // Save value to EEROM
-    EEPROM.put(EEPROM_ADDRESS_ADC_CAL, float(ADC_MAX) / throttle_position_adc);
-  }
-
-  // Read the calibration value out of EEPROM
-  EEPROM.get(EEPROM_ADDRESS_ADC_CAL, throttle_position_cal);
-
   /** Setup PWM output **/
-  pinMode(OUT_PWM_PIN, OUTPUT);
-  // Set the pin low
-  digitalWrite(OUT_PWM_PIN, LOW);
-
+  // refer to https://sites.google.com/site/qeewiki/books/avr-guide/pwm-on-the-atmega328
   // Set Timer 1 PWM to phase corrected (X bit) to give 16KHz
   // This means no prescalar and a 9 bit PWM. Starting with 10 bit
   // and using ICR1 as top so we can set it from define above
@@ -78,24 +78,16 @@ void setup() {
   // Start the timer and hence the PWM
   TCCR1B                       |= (1 << CS10);
 
-  /** Block exiting setup until throttle has gone back to below threshold **/
-  while (analogRead(IN_THROTTLE_ADC_PIN) >= THROTTLE_LOW_THRESHOLD){
-    delay(10);
-  }
-
 }
 
 void loop() {
-    // Read throttle
-    throttle_position_adc       = analogRead(IN_THROTTLE_ADC_PIN);
 
     // Find PWM input and clamp at 1024, or 0 if brake is on
-    pwm_input_value             = (throttle_position_adc * throttle_position_cal / ADC_MAX) * PWM_MAX;
-    if (digitalRead(IN_BRAKE_PIN) == LOW ) {
+    throttle_position_adc       = analogRead(IN_THROTTLE_ADC_PIN);
+    pwm_input_value             = calculate_pwm_input(throttle_position_adc);
+    brake_on                    = digitalRead(IN_BRAKE_PIN);
+    if (brake_on == LOW ) {
       pwm_input_value           = 0;
-    }
-    if (pwm_input_value > PWM_MAX) {
-      pwm_input_value           = PWM_MAX;
     }
 
     // Set the PWM output
@@ -103,8 +95,8 @@ void loop() {
 
     Serial.print("Throttle position: ");
     Serial.print(throttle_position_adc);
-    Serial.print(" Calibration constant: ");
-    Serial.print(throttle_position_cal);
+    Serial.print(" Brake on: ");
+    Serial.print(!brake_on);
     Serial.print(". Calibrated output: ");
     Serial.println(pwm_input_value);
 
