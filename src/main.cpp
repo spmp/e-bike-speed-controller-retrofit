@@ -3,6 +3,7 @@
 /** Pin defines **/
 #define IN_THROTTLE_ADC_PIN     A7
 #define IN_BRAKE_PIN            2
+#define IN_BRAKE_ON             LOW
 // Hardware allows only pin 9 or 10
 #define OUT_PWM_PIN             9
 // PWM_MAX define the frequency, set at 9 bits to give ~16KHz
@@ -21,30 +22,59 @@
 #define RAMP_PROPORTION         0.001
 #define RAMP_MAX_PWM_INCREASE   PWM_MAX*RAMP_PROPORTION
 
-/** Global variables **/
-unsigned long mileycyrus        = 0;
-uint16_t throttle_position_adc  = 0;
-uint16_t pwm_input_value        = 0;
-uint16_t pwm_input_value_prev   = 0;
-bool     brake_on               = 1;
-
 /** Functions **/
 
 /** calculate_pwm_input
  * transform the throttle reading to a value between 0 and PWM_MAX for the
  * range ADC_THROTTLE_LOW to ADC_THROTTLE_HIGH
  **/
-uint16_t calculate_pwm_input(uint16_t adc_read){
-  if (adc_read <= ADC_THROTTLE_LOW) {
-    return 0;
-  } else if (adc_read >= ADC_THROTTLE_HIGH){
-    return PWM_MAX;
+uint16_t calculate_pwm_input(
+  uint16_t adc_read,
+  bool brake_input,
+  uint16_t adc_throttle_low,
+  uint16_t adc_throttle_high,
+  uint16_t pwm_max,
+  uint16_t pwm_delta_max
+){
+  // Initialise static function variable used for ramp
+  static uint16_t pwm_input_prev = 0;
+  // Initialise static function valriable used to hold temporary return value
+  static uint16_t pwm_input = 0;
+
+  // Clamp input between 0 and pwm_max in the input range adc_throttle_low to
+  // adc_throttle_high.
+  // Zero the input value if the brake is on
+  // If adc_read is between low and high map it onto the range 0 to pwm_max
+  if (adc_read <= adc_throttle_low || brake_input == true) {
+    pwm_input = 0;
+  } else if (adc_read >= adc_throttle_high){
+    pwm_input = pwm_max;
   } else {
-    return uint16_t(
-      ((float(adc_read) - ADC_THROTTLE_LOW)/
-        (ADC_THROTTLE_HIGH - ADC_THROTTLE_LOW))*
-        PWM_MAX
+    pwm_input =  uint16_t(
+      ((float(adc_read) - adc_throttle_low)/
+        (adc_throttle_high - adc_throttle_low))*
+        pwm_max
       );
+  }
+
+  // Apply a ramp to the pwm_input, ensuring that the increase in pwm_input
+  // is never greater than the previous value + pwm_delta_max
+  if (pwm_input > pwm_input_prev + pwm_delta_max) {
+    pwm_input = pwm_input_prev + pwm_delta_max;
+  }
+  // Update the previouse pwm_input
+  pwm_input_prev = pwm_input;
+
+  // Return the pwm_input
+  return pwm_input;
+
+}
+
+bool check_brake(uint8_t brake_pin, uint8_t on_value){
+  if (digitalRead(brake_pin) == on_value) {
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -82,11 +112,16 @@ void setup() {
   TCCR1B                       |= (1 << WGM13);
 
   // Start the timer and hence the PWM
-  TCCR1B                       |= (1 << CS10);
+  TCCR1B                        |= (1 << CS10);
 
 }
 
 void loop() {
+  // The variables
+  static unsigned long mileycyrus        = 0;
+  static uint16_t throttle_position_adc  = 0;
+  static bool     brake_on               = true;
+  static uint16_t pwm_input_value        = 0;
 
   // Run various tasks at different cadences.
   // We update the PWM duty cycle every 100th of a second (every 10 millis)
@@ -94,23 +129,20 @@ void loop() {
   mileycyrus = millis();
   // Every 10 milliseconds
   if (mileycyrus % 10 == 0) {
-    // Find PWM input and clamp at 1024, or 0 if brake is on
+    // Find PWM input to the PWM thingimiginator
     throttle_position_adc       = analogRead(IN_THROTTLE_ADC_PIN);
-    pwm_input_value             = calculate_pwm_input(throttle_position_adc);
-    brake_on                    = digitalRead(IN_BRAKE_PIN);
-    if (brake_on == LOW ) {
-      pwm_input_value           = 0;
-    }
-
-    // Apply a ramp if reading is higher than previous clamp incerase
-    // to previous + ramp max
-    if (pwm_input_value > pwm_input_value_prev + RAMP_MAX_PWM_INCREASE) {
-      pwm_input_value = pwm_input_value_prev + RAMP_MAX_PWM_INCREASE;
-    }
-    pwm_input_value_prev = pwm_input_value;
+    brake_on                    = check_brake(IN_BRAKE_PIN, IN_BRAKE_ON);
+    pwm_input_value             = calculate_pwm_input(
+                                    throttle_position_adc,
+                                    brake_on,
+                                    ADC_THROTTLE_LOW,
+                                    ADC_THROTTLE_HIGH,
+                                    PWM_MAX,
+                                    RAMP_MAX_PWM_INCREASE
+                                  );
 
     // Set the PWM output
-    OCR1A = pwm_input_value;
+    OCR1A                       = pwm_input_value;
   }
   // every 100 milliseconds
   if (mileycyrus % 100 == 0) {
@@ -119,7 +151,7 @@ void loop() {
     Serial.print(" Throttle position: ");
     Serial.print(throttle_position_adc);
     Serial.print(" Brake on: ");
-    Serial.print(!brake_on);
+    Serial.print(brake_on);
     Serial.print(". Calibrated output: ");
     Serial.println(pwm_input_value);
   }
