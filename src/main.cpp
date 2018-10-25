@@ -6,7 +6,7 @@
 // Hardware allows only pin 9 or 10
 #define OUT_PWM_PIN             9
 // PWM_MAX define the frequency, set at 9 bits to give ~16KHz
-#define PWM_MAX                 0x3FF
+#define PWM_MAX                 0xFFF
 
 /** Serial 0 - debug serial **/
 // Serial (0) defines
@@ -17,9 +17,15 @@
 #define ADC_THROTTLE_LOW        205
 #define ADC_THROTTLE_HIGH       690
 
+/** Ramp (up) constant **/
+#define RAMP_PROPORTION         0.001
+#define RAMP_MAX_PWM_INCREASE   PWM_MAX*RAMP_PROPORTION
+
 /** Global variables **/
+unsigned long mileycyrus        = 0;
 uint16_t throttle_position_adc  = 0;
 uint16_t pwm_input_value        = 0;
+uint16_t pwm_input_value_prev   = 0;
 bool     brake_on               = 1;
 
 /** Functions **/
@@ -82,6 +88,12 @@ void setup() {
 
 void loop() {
 
+  // Run various tasks at different cadences.
+  // We update the PWM duty cycle every 100th of a second (every 10 millis)
+  // and we update the display every quarter of a second
+  mileycyrus = millis();
+  // Every 10 milliseconds
+  if (mileycyrus % 10 == 0) {
     // Find PWM input and clamp at 1024, or 0 if brake is on
     throttle_position_adc       = analogRead(IN_THROTTLE_ADC_PIN);
     pwm_input_value             = calculate_pwm_input(throttle_position_adc);
@@ -90,15 +102,25 @@ void loop() {
       pwm_input_value           = 0;
     }
 
+    // Apply a ramp if reading is higher than previous clamp incerase
+    // to previous + ramp max
+    if (pwm_input_value > pwm_input_value_prev + RAMP_MAX_PWM_INCREASE) {
+      pwm_input_value = pwm_input_value_prev + RAMP_MAX_PWM_INCREASE;
+    }
+    pwm_input_value_prev = pwm_input_value;
+
     // Set the PWM output
     OCR1A = pwm_input_value;
-
-    Serial.print("Throttle position: ");
+  }
+  // every 100 milliseconds
+  if (mileycyrus % 100 == 0) {
+    Serial.print("Millisomethings: ");
+    Serial.print(mileycyrus);
+    Serial.print(" Throttle position: ");
     Serial.print(throttle_position_adc);
     Serial.print(" Brake on: ");
     Serial.print(!brake_on);
     Serial.print(". Calibrated output: ");
     Serial.println(pwm_input_value);
-
-    delay(100);
+  }
 }
