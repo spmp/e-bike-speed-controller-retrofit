@@ -1,0 +1,424 @@
+EESchema Schematic File Version 4
+LIBS:atv-controller-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Regulator_Linear:LM317_3PinPackage U?
+U 1 1 5BDDFE7F
+P 4650 2700
+F 0 "U?" H 4650 2942 50  0000 C CNN
+F 1 "LM317_3PinPackage" H 4650 2851 50  0000 C CNN
+F 2 "" H 4650 2950 50  0001 C CIN
+F 3 "http://www.ti.com/lit/ds/symlink/lm317.pdf" H 4650 2700 50  0001 C CNN
+	1    4650 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Driver_FET:MCP1416R U?
+U 1 1 5BDE02FF
+P 7000 3050
+F 0 "U?" H 7441 3096 50  0000 L CNN
+F 1 "MCP1416R" H 7441 3005 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5" H 7000 2650 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/20002092F.pdf" H 6800 3300 50  0001 C CNN
+	1    7000 3050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP C?
+U 1 1 5BDE0671
+P 5500 2900
+F 0 "C?" H 5618 2946 50  0000 L CNN
+F 1 "1-100uF" H 5618 2855 50  0000 L CNN
+F 2 "" H 5538 2750 50  0001 C CNN
+F 3 "~" H 5500 2900 50  0001 C CNN
+	1    5500 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5BDE0761
+P 6100 2900
+F 0 "C?" H 6215 2946 50  0000 L CNN
+F 1 "100nF" H 6215 2855 50  0000 L CNN
+F 2 "" H 6138 2750 50  0001 C CNN
+F 3 "~" H 6100 2900 50  0001 C CNN
+	1    6100 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5BDE083B
+P 5100 2900
+F 0 "R?" H 5170 2946 50  0000 L CNN
+F 1 "130" H 5170 2855 50  0000 L CNN
+F 2 "" V 5030 2900 50  0001 C CNN
+F 3 "~" H 5100 2900 50  0001 C CNN
+	1    5100 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5BDE08B0
+P 5100 3300
+F 0 "R?" H 5170 3346 50  0000 L CNN
+F 1 "1K5" H 5170 3255 50  0000 L CNN
+F 2 "" V 5030 3300 50  0001 C CNN
+F 3 "~" H 5100 3300 50  0001 C CNN
+	1    5100 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5BDE0B69
+P 5100 3600
+F 0 "#PWR?" H 5100 3350 50  0001 C CNN
+F 1 "GND" H 5105 3427 50  0000 C CNN
+F 2 "" H 5100 3600 50  0001 C CNN
+F 3 "" H 5100 3600 50  0001 C CNN
+	1    5100 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP C?
+U 1 1 5BDE0BD5
+P 4000 2900
+F 0 "C?" H 4118 2946 50  0000 L CNN
+F 1 "0.1uF" H 4118 2855 50  0000 L CNN
+F 2 "" H 4038 2750 50  0001 C CNN
+F 3 "~" H 4000 2900 50  0001 C CNN
+	1    4000 2900
+	1    0    0    -1  
+$EndComp
+Text GLabel 3650 2700 0    50   Input ~ 0
+Vbat
+Text GLabel 6500 3050 0    50   Input ~ 0
+PWM
+Text GLabel 7400 2700 2    50   Input ~ 0
+Vdd
+Wire Wire Line
+	3650 2700 4000 2700
+Wire Wire Line
+	4000 2700 4000 2750
+Connection ~ 4000 2700
+Wire Wire Line
+	4000 2700 4350 2700
+Wire Wire Line
+	4950 2700 5100 2700
+Wire Wire Line
+	5100 2700 5100 2750
+Connection ~ 5100 2700
+Wire Wire Line
+	5100 2700 5500 2700
+Wire Wire Line
+	5100 3050 5100 3100
+Wire Wire Line
+	4650 3000 4650 3100
+Wire Wire Line
+	4650 3100 5100 3100
+Connection ~ 5100 3100
+Wire Wire Line
+	5100 3100 5100 3150
+Wire Wire Line
+	5100 3600 5100 3550
+Wire Wire Line
+	4000 3050 4000 3550
+Wire Wire Line
+	4000 3550 5100 3550
+Connection ~ 5100 3550
+Wire Wire Line
+	5100 3550 5100 3450
+Wire Wire Line
+	5100 3550 5500 3550
+Wire Wire Line
+	7000 3550 7000 3350
+Wire Wire Line
+	6500 3050 6700 3050
+Wire Wire Line
+	5500 2700 5500 2750
+Wire Wire Line
+	5500 2700 6100 2700
+Wire Wire Line
+	5500 3050 5500 3550
+Wire Wire Line
+	5500 3550 6100 3550
+Connection ~ 5500 3550
+Connection ~ 5500 2700
+Wire Wire Line
+	6100 2700 6100 2750
+Connection ~ 6100 2700
+Wire Wire Line
+	6100 3050 6100 3550
+Connection ~ 6100 3550
+Wire Wire Line
+	6100 3550 7000 3550
+Wire Wire Line
+	6100 2700 7000 2700
+Wire Wire Line
+	7000 2700 7000 2750
+Connection ~ 7000 2700
+Wire Wire Line
+	7000 2700 7400 2700
+$Comp
+L Device:Q_NMOS_DGS Q?
+U 1 1 5BDE2765
+P 8000 3050
+F 0 "Q?" H 8205 3096 50  0000 L CNN
+F 1 "Q_NMOS_DGS" H 8205 3005 50  0000 L CNN
+F 2 "" H 8200 3150 50  0001 C CNN
+F 3 "~" H 8000 3050 50  0001 C CNN
+	1    8000 3050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5BDE27D7
+P 8800 3000
+F 0 "C?" H 8915 3046 50  0000 L CNN
+F 1 "68nF" H 8915 2955 50  0000 L CNN
+F 2 "" H 8838 2850 50  0001 C CNN
+F 3 "~" H 8800 3000 50  0001 C CNN
+	1    8800 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5BDE2837
+P 8800 3400
+F 0 "R?" H 8870 3446 50  0000 L CNN
+F 1 "22" H 8870 3355 50  0000 L CNN
+F 2 "" V 8730 3400 50  0001 C CNN
+F 3 "~" H 8800 3400 50  0001 C CNN
+	1    8800 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5BDE28A7
+P 8800 3650
+F 0 "#PWR?" H 8800 3400 50  0001 C CNN
+F 1 "GND" H 8805 3477 50  0000 C CNN
+F 2 "" H 8800 3650 50  0001 C CNN
+F 3 "" H 8800 3650 50  0001 C CNN
+	1    8800 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5BDE29D1
+P 8800 2600
+F 0 "R?" H 8870 2646 50  0000 L CNN
+F 1 "Motor" H 8870 2555 50  0000 L CNN
+F 2 "" V 8730 2600 50  0001 C CNN
+F 3 "~" H 8800 2600 50  0001 C CNN
+	1    8800 2600
+	1    0    0    -1  
+$EndComp
+Text GLabel 8800 2250 1    50   Input ~ 0
+Vbat
+Wire Wire Line
+	8800 2250 8800 2400
+$Comp
+L Device:D_Schottky D?
+U 1 1 5BDE437A
+P 8100 2600
+F 0 "D?" V 8054 2679 50  0000 L CNN
+F 1 "D_Schottky" V 8145 2679 50  0000 L CNN
+F 2 "" H 8100 2600 50  0001 C CNN
+F 3 "~" H 8100 2600 50  0001 C CNN
+	1    8100 2600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	8100 2450 8100 2400
+Wire Wire Line
+	8100 2400 8800 2400
+Connection ~ 8800 2400
+Wire Wire Line
+	8800 2400 8800 2450
+Wire Wire Line
+	8100 2750 8100 2800
+Wire Wire Line
+	8100 2800 8800 2800
+Wire Wire Line
+	8800 2800 8800 2750
+Connection ~ 8100 2800
+Wire Wire Line
+	8100 2800 8100 2850
+Wire Wire Line
+	8800 2800 8800 2850
+Connection ~ 8800 2800
+Wire Wire Line
+	8800 3150 8800 3250
+Wire Wire Line
+	8800 3550 8800 3650
+Wire Wire Line
+	8100 3250 8100 3550
+Wire Wire Line
+	8100 3550 7000 3550
+Connection ~ 7000 3550
+Wire Wire Line
+	7400 3050 7800 3050
+$Comp
+L MCU_Module:Arduino_Nano_v3.x A?
+U 1 1 5BDE76FB
+P 4300 5200
+F 0 "A?" H 4300 4114 50  0000 C CNN
+F 1 "Arduino_Nano_v3.x" H 4300 4023 50  0000 C CNN
+F 2 "Module:Arduino_Nano" H 4450 4250 50  0001 L CNN
+F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 4300 4200 50  0001 C CNN
+	1    4300 5200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 5BDE872E
+P 5400 5900
+F 0 "RV?" H 5331 5946 50  0000 R CNN
+F 1 "Throttle" H 5331 5855 50  0000 R CNN
+F 2 "" H 5400 5900 50  0001 C CNN
+F 3 "~" H 5400 5900 50  0001 C CNN
+	1    5400 5900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5BDE87C5
+P 4400 6500
+F 0 "#PWR?" H 4400 6250 50  0001 C CNN
+F 1 "GND" H 4405 6327 50  0000 C CNN
+F 2 "" H 4400 6500 50  0001 C CNN
+F 3 "" H 4400 6500 50  0001 C CNN
+	1    4400 6500
+	1    0    0    -1  
+$EndComp
+Text GLabel 4200 4000 1    50   Input ~ 0
+Vdd
+Wire Wire Line
+	4200 4000 4200 4200
+Wire Wire Line
+	4400 6200 4400 6250
+Wire Wire Line
+	5400 6050 5400 6250
+Wire Wire Line
+	5400 6250 5000 6250
+Connection ~ 4400 6250
+Wire Wire Line
+	4400 6250 4400 6500
+Wire Wire Line
+	4500 4200 4500 4150
+Wire Wire Line
+	4500 4150 5000 4150
+Wire Wire Line
+	5400 4150 5400 5750
+Wire Wire Line
+	5250 5900 4800 5900
+$Comp
+L Switch:SW_DIP_x01 SW?
+U 1 1 5BDEAFED
+P 2900 5450
+F 0 "SW?" V 2946 5320 50  0000 R CNN
+F 1 "Brake" V 2855 5320 50  0000 R CNN
+F 2 "" H 2900 5450 50  0001 C CNN
+F 3 "" H 2900 5450 50  0001 C CNN
+	1    2900 5450
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3800 4800 2900 4800
+Wire Wire Line
+	2900 6250 3550 6250
+Text GLabel 3350 5200 0    50   Input ~ 0
+PWM
+$Comp
+L pspice:DIODE D?
+U 1 1 5BE40F11
+P 2900 6000
+F 0 "D?" V 2854 6128 50  0000 L CNN
+F 1 "DIODE" V 2945 6128 50  0000 L CNN
+F 2 "" H 2900 6000 50  0001 C CNN
+F 3 "" H 2900 6000 50  0001 C CNN
+	1    2900 6000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2900 4800 2900 5150
+Wire Wire Line
+	2900 5750 2900 5800
+Wire Wire Line
+	2900 6200 2900 6250
+$Comp
+L Device:R R?
+U 1 1 5BE44415
+P 3550 5700
+F 0 "R?" H 3620 5746 50  0000 L CNN
+F 1 "10k" H 3620 5655 50  0000 L CNN
+F 2 "" V 3480 5700 50  0001 C CNN
+F 3 "~" H 3550 5700 50  0001 C CNN
+	1    3550 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3800 5200 3550 5200
+Wire Wire Line
+	3550 5200 3550 5550
+Connection ~ 3550 5200
+Wire Wire Line
+	3550 5200 3350 5200
+Wire Wire Line
+	3550 5850 3550 6250
+Connection ~ 3550 6250
+Wire Wire Line
+	3550 6250 4400 6250
+$Comp
+L Device:Thermistor_NTC TH?
+U 1 1 5BE63A2F
+P 5000 4900
+F 0 "TH?" H 5098 4946 50  0000 L CNN
+F 1 "100k" H 5098 4855 50  0000 L CNN
+F 2 "" H 5000 4950 50  0001 C CNN
+F 3 "~" H 5000 4950 50  0001 C CNN
+	1    5000 4900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5BE63A9B
+P 5000 5700
+F 0 "R?" H 5070 5746 50  0000 L CNN
+F 1 "100k" H 5070 5655 50  0000 L CNN
+F 2 "" V 4930 5700 50  0001 C CNN
+F 3 "~" H 5000 5700 50  0001 C CNN
+	1    5000 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5000 5850 5000 6250
+Connection ~ 5000 6250
+Wire Wire Line
+	5000 6250 4400 6250
+Wire Wire Line
+	5000 5050 5000 5500
+Wire Wire Line
+	5000 4750 5000 4150
+Connection ~ 5000 4150
+Wire Wire Line
+	5000 4150 5400 4150
+Wire Wire Line
+	4800 5500 5000 5500
+Connection ~ 5000 5500
+Wire Wire Line
+	5000 5500 5000 5550
+$EndSCHEMATC
