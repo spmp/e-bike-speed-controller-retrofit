@@ -2,14 +2,14 @@
 #include <math.h>
 
 /** TEMPERATURE max **/
-#define TEMPERATURE_MAX        90
+#define TEMPERATURE_MAX         50
+#define CURRENT_MAX             50
 
 /** Pin defines **/
-#define IN_THROTTLE_ADC_PIN     A7
-#define IN_BRAKE_PIN            2
-#define IN_BRAKE_ON             LOW
-#define BRAKE_COUNT_MIN         10
-#define IN_TEMP_ADC_PIN         A3
+#define IN_THROTTLE_ADC_PIN     A5
+#define IN_TEMP_ADC_PIN         A6
+#define IN_CURRENT_SENSE_PIN    A4
+#define IN_BRAKE_PIN            7
 
 // Hardware allows only pin 9 or 10
 #define OUT_PWM_PIN             9
@@ -26,7 +26,7 @@
 #define ADC_THROTTLE_HIGH       850
 
 /** Ramp (up) constant **/
-#define RAMP_PROPORTION         0.0025
+#define RAMP_PROPORTION         0.00375
 #define RAMP_MAX_PWM_INCREASE   PWM_MAX*RAMP_PROPORTION
 
 /** NTC parameters **/
@@ -34,7 +34,9 @@
 #define NTC_T0                  25
 #define CK0                     273
 
-
+/** Brake parameter **/
+#define IN_BRAKE_ON             LOW
+#define BRAKE_COUNT_MIN         10
 
 /** Functions **/
 
@@ -116,6 +118,7 @@ uint8_t check_temperature(uint8_t temperature_sensor_pin) {
 
   return (1 /t_inverse) - CK0;
 }
+
 void setup() {
   // Set PWM pin output and low at turn on
   pinMode(OUT_PWM_PIN, OUTPUT);
@@ -151,6 +154,7 @@ void setup() {
 
   // Start the timer and hence the PWM
   TCCR1B                        |= (1 << CS10);
+  // TCCR1B                        |= (1 << CS11);
 
 }
 
@@ -159,12 +163,15 @@ void loop() {
   bool   over_temperature_shutdown       = false;
   static unsigned long mileycyrus        = 0;
   static uint16_t throttle_position_adc  = 0;
+  // static uint16_t current_sense_adc      = 0;
+  static uint8_t temperature_adc         = 0;
   static bool     brake_on               = true;
-  static uint8_t temperature             = 0;
   static uint16_t pwm_input_value        = 0;
 
   // Check for over temperature
-  if (over_temperature_shutdown == true || temperature >= TEMPERATURE_MAX) {
+
+  // if ( true == false ) {
+  if (over_temperature_shutdown == true || temperature_adc >= TEMPERATURE_MAX) {
       // Shut it all down
       over_temperature_shutdown = true;
       OCR1A = 0;
@@ -177,8 +184,9 @@ void loop() {
     if (mileycyrus % 10 == 0) {
       // Find PWM input to the PWM thingimiginator
       throttle_position_adc       = analogRead(IN_THROTTLE_ADC_PIN);
+      // current_sense_adc           = analogRead(IN_CURRENT_SENSE_PIN);
+      temperature_adc             = check_temperature(IN_TEMP_ADC_PIN);
       brake_on                    = check_brake(IN_BRAKE_PIN, IN_BRAKE_ON);
-      temperature                 = check_temperature(IN_TEMP_ADC_PIN);
       pwm_input_value             = calculate_pwm_input(
                                       throttle_position_adc,
                                       brake_on,
@@ -190,6 +198,8 @@ void loop() {
 
       // Set the PWM output
       OCR1A                       = pwm_input_value;
+      // OCR1A                       = PWM_MAX /4
+
     }
     // every 100 milliseconds
     if (mileycyrus % 100 == 0) {
@@ -199,8 +209,10 @@ void loop() {
       Serial.print(throttle_position_adc);
       Serial.print(" Brake on: ");
       Serial.print(brake_on);
-      Serial.print(" Temperature : ");
-      Serial.print(temperature);
+      // Serial.print(" current_adc : ");
+      // Serial.print(current_sense_adc);
+      Serial.print(" temperature_adc : ");
+      Serial.print(temperature_adc);
       Serial.print(". Calibrated output: ");
       Serial.println(pwm_input_value);
     }
